@@ -26,6 +26,10 @@ namespace Log4Vala {
 		 * Path to configuration file.
 		 */
 		public string config_file { get; set; }
+		/**
+		 * Path to resource file.
+		 */
+		public string resource_path { get; set; }
 
 		/**
 		 * Translate Type name to a guessed class name when getting a logger by
@@ -147,27 +151,57 @@ namespace Log4Vala {
 		 * clear the existing configuration.
 		 */
 		public void parse_config() {
-			var file = File.new_for_path(config_file);
-			if ( ! file.query_exists() ) {
+			GLib.InputStream input = null;
+
+			if (config_file != null) {
+				var file = File.new_for_path(config_file);
+				if ( ! file.query_exists() ) {
+					Logger.get_logger("log4vala.internal").error(
+						"Config file '%s' does not exist".printf(config_file)
+					);
+					return;
+				}
+
+				try {
+					input = file.read();
+				} catch (Error e) {
+					Logger.get_logger("log4vala.internal").error(
+						"Unable to open config file '%s'!".printf(config_file),
+						e
+					);
+				}
+			} else if ( resource_path != null ) {
+				try {
+					input = GLib.resources_open_stream(resource_path, ResourceLookupFlags.NONE);
+				} catch (Error e) {
+					Logger.get_logger("log4vala.internal").error(
+						"Unable to open config resource '%s'!".printf(resource_path),
+						e
+					);
+					return;
+
+				}
+			} else {
 				Logger.get_logger("log4vala.internal").error(
-					"Config file '%s' does not exist".printf(config_file)
-				);
+					"No config file specified!");
 				return;
 			}
 
 			set_defaults();
 
 			try {
-				var dis = new DataInputStream( file.read() );
+				var dis = new DataInputStream( input );
 				string line;
 				while ( (line = dis.read_line(null) ) != null ) {
 					parse_config_line( ref line );
 				}
 			} catch (Error e) {
 				Logger.get_logger("log4vala.internal").error(
-					"Unable to open or read config file '%s'!".printf(config_file),
+					"Unable to read config file!",
 					e
-				);
+					);
+				return;
+
 			}
 
 			if ( root_appender_description != null ) {
@@ -305,16 +339,24 @@ namespace Log4Vala {
 			loggers = new HashTable<string,LoggerConfig?>( str_hash, str_equal );
 		}
 
-		internal static void init( string? config_file ) {
+		internal static void init() {
+			instance = new Config();
+		}
+
+		internal static void init_from_file( string config_file ) {
 			instance = new Config();
 			instance.config_file = config_file;
-			if ( instance.config_file != null ) {
-				instance.parse_config();
-			}
+			instance.parse_config();
+		}
+
+		internal static void init_from_resource( string resource_path ) {
+			instance = new Config();
+			instance.resource_path = resource_path;
+			instance.parse_config();
 		}
 
 		internal static void init_and_watch( string? config_file, int interval ) {
-			init(config_file);
+			init_from_file(config_file);
 			instance.watch_config(interval);
 		}
 

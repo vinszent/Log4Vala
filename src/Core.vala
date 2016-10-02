@@ -1,10 +1,25 @@
 namespace Log4Vala {
 	/**
 	 * Initialize Log4Vala for the application.
+	 */
+	public static void init() {
+		Config.init();
+	}
+
+	/**
+	 * Initialize Log4Vala for the application.
 	 * @param config_file Path to configuration file.
 	 */
-	public static void init( string? config_file = null ) {
-		Config.init(config_file);
+	public static void init_from_file( string config_file ) {
+		Config.init_from_file(config_file);
+	}
+
+	/**
+	 * Initialize Log4Vala for the application.
+	 * @param resource_path Path to resource file.
+	 */
+	public static void init_from_resource( string resource_path) {
+		Config.init_from_resource(resource_path);
 	}
 
 	/**
