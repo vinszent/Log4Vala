@@ -1,6 +1,6 @@
-project('log4vala', ['c', 'vala'],
+project('log4vala', 'vala', 'c',
         version : '0.0.1',
-        meson_version : '>=0.31.0')
+        meson_version : '>=0.35.0')
 
 src = ['src/Config.vala',
    	   'src/Core.vala',
