@@ -322,12 +322,13 @@ namespace Log4Vala {
 
 		internal Config() {
 			set_defaults();
-			Type f = typeof(ScreenAppender);
-			f = typeof(FileAppender);
-			f = typeof(SocketAppender);
-			f = typeof(DescriptiveLayout);
-			f = typeof(PatternLayout);
-			f = typeof(SimpleLayout);
+			Type f1 = typeof(ScreenAppender);
+			Type f2 = typeof(FileAppender);
+			Type f3 = typeof(SocketAppender);
+			Type f4 = typeof(DescriptiveLayout);
+			Type f5 = typeof(PatternLayout);
+			Type f6 = typeof(SimpleLayout);
+			var s = @"$f1 $f2 $f3 $f4 $f5 $f6";
 		}
 
 		internal void set_defaults() {
